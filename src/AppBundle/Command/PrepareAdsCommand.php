@@ -26,12 +26,18 @@ class PrepareAdsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $filename = $input->getArgument('filename');               
-        $fileContent = file_get_contents($filename);
-        $newFilename = $filename.'1';
-        file_put_contents($newFilename, $fileContent);
-        $output->writeln([
-                "File ($newFilename) has been saved."
-        ]);
+        $filename = $input->getArgument('filename');
+        if (file_exists($filename)){
+            $csvData = file_get_contents($filename);
+            $lines = explode(PHP_EOL, $csvData);
+            $array = array();
+            foreach ($lines as $line) {
+                $array[] = explode("\t", $line);
+            }
+            print_r($array);
+        } else {
+            exit("$filename not exists");
+        }
+            
     }
 }
