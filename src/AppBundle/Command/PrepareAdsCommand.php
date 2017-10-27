@@ -27,34 +27,40 @@ class PrepareAdsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $filename = $input->getArgument('filename');
+        $outputDir = 'lab/output/';
         if (file_exists($filename)){
-            $csvData = file_get_contents($filename);
-            $lines = explode(PHP_EOL, $csvData);
+            $lines = explode(PHP_EOL, file_get_contents($filename));
             foreach ($lines as $line) {
                 $books[] = explode("\t", $line);
             }
-            foreach ($books[0] as $key => $header) {
-                $bookHeader[] = rtrim($header); 
-            }
+            $bookHeader = $this->getHeader($books);
             unset($books[0]);
-            $bookDescription = '';
             foreach ($books as $book) {
                 $bookDescription = '';
                 foreach ($book as $key => $bookDetail) {
                     if ($key != 0){
-                     $bookDescription .=  $bookHeader[$key] .": ". rtrim($bookDetail)."\n\n";                        
+                        $bookDescription .=  $bookHeader[$key] .": ". rtrim($bookDetail)."\n\n";                        
                     }
                     if ($key == 1) {
-                       $bookTitle = str_replace(',','-',rtrim($bookDetail));
+                        $bookTitle = str_replace(',','-',rtrim($bookDetail));
                     } 
                 }
-                echo 'OutputFilename: '.$bookTitle."\n";
-                echo $bookDescription;
-                echo "---\n";                
+                if (!file_exists($outputDir)) {
+                    mkdir($outputDir);
+                }
+                file_put_contents($outputDir.'/'.$bookTitle.'.txt', $bookDescription);
             }
         } else {
             exit("$filename not exists");
         }
            
+    }
+    private function getHeader($books)
+    {
+            foreach ($books[0] as $header) {
+                $bookHeader[] = rtrim($header); 
+            }
+            
+            return $bookHeader;
     }
 }
