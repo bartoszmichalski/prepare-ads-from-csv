@@ -20,7 +20,7 @@ class PrepareAdsCommand extends Command
         $this
         ->setName('prepareAds')
         ->setDescription('Genarate txt files with your ads')
-        ->setHelp('This command allows you prepare txt files with your ads from csv file')
+        ->setHelp('This command allows you prepare txt files with your ads from csv file (acctualy TAB separated txt file)')
         ->addArgument('filename', InputArgument::REQUIRED, 'Input CSV filename.');
     }
 
@@ -30,14 +30,31 @@ class PrepareAdsCommand extends Command
         if (file_exists($filename)){
             $csvData = file_get_contents($filename);
             $lines = explode(PHP_EOL, $csvData);
-            $array = array();
             foreach ($lines as $line) {
-                $array[] = explode("\t", $line);
+                $books[] = explode("\t", $line);
             }
-            print_r($array);
+            foreach ($books[0] as $key => $header) {
+                $bookHeader[] = rtrim($header); 
+            }
+            unset($books[0]);
+            $bookDescription = '';
+            foreach ($books as $book) {
+                $bookDescription = '';
+                foreach ($book as $key => $bookDetail) {
+                    if ($key != 0){
+                     $bookDescription .=  $bookHeader[$key] .": ". rtrim($bookDetail)."\n\n";                        
+                    }
+                    if ($key == 1) {
+                       $bookTitle = str_replace(',','-',rtrim($bookDetail));
+                    } 
+                }
+                echo 'OutputFilename: '.$bookTitle."\n";
+                echo $bookDescription;
+                echo "---\n";                
+            }
         } else {
             exit("$filename not exists");
         }
-            
+           
     }
 }
